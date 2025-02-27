@@ -1,5 +1,8 @@
 use game_pieces_rs::card::Card;
+use game_pieces_rs::deck::Deck;
 
 pub struct BlackJackGame {
-    temp:f64,
+    hand: Vec<Card>,
+    dealer: Vec<Card>,
+    deck: Deck,
 }
