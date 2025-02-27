@@ -1,0 +1,11 @@
+[package]
+name = "blackjack_rs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "blackjack_rs"
+
+[dependencies]
+
+game_pieces_rs = { git = "https://github.com/NickyNocerino/game_pieces_rs.git" }
