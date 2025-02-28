@@ -2,5 +2,10 @@ use game_pieces_rs::card::Card;
 use blackjack_rs::game::BlackJackGame;
 
 fn main() {
-    println!("Hello, world!");
+    let mut bj_game = BlackJackGame::new_standard(2);
+    bj_game.print_contents();
+    bj_game = bj_game.deal();
+    bj_game = bj_game.hit();
+    bj_game.print_contents();
+
 }
