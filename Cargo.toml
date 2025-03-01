@@ -9,3 +9,6 @@ name = "blackjack_rs"
 [dependencies]
 
 game_pieces_rs = { git = "https://github.com/NickyNocerino/game_pieces_rs.git" }
+
+[dependencies.redis]
+version = "*"
