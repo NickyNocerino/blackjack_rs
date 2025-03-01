@@ -1,25 +1,25 @@
+use game_pieces_rs::blackjack_deck::BlackjackDeck;
 use game_pieces_rs::card::{Suit, Rank, Card};
-use game_pieces_rs::deck::Deck;
 
 use std::time::{Instant};
 use std::fs;
 use std::path::Path;
 
 
-pub struct BlackJackGame {
-    hand: Vec<Card>,
-    dealer: Vec<Card>,
+pub struct OptimizedBlackJackGame {
+    hand: Vec<usize>,
+    dealer: Vec<usize>,
     stay: bool,
-    deck: Deck,
+    deck: BlackjackDeck,
 }
 
-impl BlackJackGame {
+impl OptimizedBlackJackGame {
     pub fn new_empty() -> Self {
         Self{
-            hand:Vec::<Card>::new(),
-            dealer:Vec::<Card>::new(),
+            hand:Vec::<usize>::new(),
+            dealer:Vec::<usize>::new(),
             stay:false,
-            deck:Deck::new_empty(),
+            deck:BlackjackDeck::new_empty(),
         }
     }
 
@@ -34,11 +34,11 @@ impl BlackJackGame {
                 }
             }
         }
-        let deck = Deck::from_vec(&deck_list);
+        let deck = BlackjackDeck::from_vec(&deck_list);
 
         Self {
-            hand:Vec::<Card>::new(),
-            dealer:Vec::<Card>::new(),
+            hand:Vec::<usize>::new(),
+            dealer:Vec::<usize>::new(),
             stay:false,
             deck:deck,
         }
@@ -49,16 +49,16 @@ impl BlackJackGame {
         let mut count_by_blackjack_value = [0usize;10];
         count_by_blackjack_value.clone_from_slice(&self.deck.count_by_blackjack_value);
         let bjvc_string = count_by_blackjack_value.iter().map(|x| x.to_string()).collect::<Vec<String>>().join("-");
-        let mut hand = self.hand.clone().iter().map(|x| x.get_blackjack_value_index()).collect::<Vec<usize>>();
+        let mut hand = self.hand.clone();
         hand.sort();
         let hand_index_string = hand.iter().map(|x| x.to_string()).collect::<Vec<String>>().join("-");
-        let mut dealer = self.dealer.clone().iter().map(|x| x.get_blackjack_value_index()).collect::<Vec<usize>>();
+        let mut dealer = self.dealer.clone();
         dealer.sort();
         let dealer_index_string = dealer.iter().map(|x| x.to_string()).collect::<Vec<String>>().join("-");
         let stay_string =self.stay.to_string();
         format!("[c={count}cbji=[{bjvc_string}]h=[{hand_index_string}]d=[{dealer_index_string}]s={stay_string}]")
     }
-
+    
     pub fn write_bin_file_cache(&self, key:String, ev:f64) {
         let filepath = format!("bin/{key}.data");
         fs::write(filepath, ev.to_be_bytes()).expect("cannot write to file");
@@ -75,24 +75,16 @@ impl BlackJackGame {
         return None;
     }
 
-    // pub fn write_redis_cache(&self, key:String, ev:f64) {
-    //     let client = redis::Client::open("redis://127.0.0.1/").expect("Failed to connect to redis");
-    //     let mut con = client.get_connection().expect("Failed to connect to redis");
-    //     con.set(key, ev.to_string()).expect("Failed to connect to redis");
-    // }
-
-    // pub fn read_redis_cache(&self, key:String) -> Option<f64> {
-    //     let client = redis::Client::open("redis://127.0.0.1/").expect("Failed to connect to redis");
-    //     let mut con = client.get_connection().expect("Failed to connect to redis");
-    //     return Some(f64::from_string(con.get(key).expect("Failed to connect to redis")));
-    // }
-
     pub fn deal(&self) -> Self {
         if self.deck.count < 3 {
             panic!("dealing from deck without enough cards")
         }
-        let mut hand = Vec::<Card>::new();
-        let mut dealer = Vec::<Card>::new();
+
+        if self.hand.len() > 0 || self.dealer.len() > 0 {
+            panic!("dealing to an already dealt game")
+        }
+        let mut hand = Vec::<usize>::new();
+        let mut dealer = Vec::<usize>::new();
         let (mut card, mut updated_deck) = self.deck.draw();
         hand.push(card);
         (card, updated_deck) = updated_deck.draw();
@@ -155,10 +147,10 @@ impl BlackJackGame {
         let mut value:usize = 0;
         let mut aces_count:usize = 0;
         for card in self.hand.iter(){
-            if card.get_blackjack_value_index() == 0 {
+            if *card == 0 {
                 aces_count += 1;
             }
-            value += card.get_blackjack_value_index() + 1; 
+            value += *card + 1;
         }
         for _i in 0..aces_count {
             if value + 10 <= 21 {
@@ -172,10 +164,10 @@ impl BlackJackGame {
         let mut value:usize = 0;
         let mut aces_count:usize = 0;
         for card in self.dealer.iter(){
-            if card.get_blackjack_value_index() == 0 {
+            if *card == 0 {
                 aces_count += 1;
             }
-            value += card.get_blackjack_value_index() + 1;
+            value += *card + 1;
         }
         for _i in 0..aces_count {
             if value + 10 <= 21 {
@@ -204,9 +196,9 @@ impl BlackJackGame {
     pub fn get_hit_expected_value(&self) -> f64 {
         let mut expected_value:f64 = 0.0;
         let draw_probs = self.deck.draw_probs_by_blackjack_value();
-        let mut hand_clone:Vec<Card>;                
-        let mut drawn_card:Card;
-        let mut drawn_deck:Deck;
+        let mut hand_clone:Vec<usize>;                
+        let mut drawn_card:usize;
+        let mut drawn_deck:BlackjackDeck;
         let mut drawn_game:Self;
         for i in 0usize..10usize {
             //println!("Hit blackjack index {:?} draw probability = {:?}", i, draw_probs[i] );
@@ -240,9 +232,9 @@ impl BlackJackGame {
     pub fn get_deck_expected_value(&self) -> f64 {
         let mut expected_value:f64 = 0.0;
         let draw_probs = self.deck.draw_probs_by_blackjack_value();
-        let mut dealer_clone:Vec<Card>;                
-        let mut drawn_card:Card;
-        let mut drawn_deck:Deck;
+        let mut dealer_clone:Vec<usize>;                
+        let mut drawn_card:usize;
+        let mut drawn_deck:BlackjackDeck;
         let mut drawn_game:Self;
         for i in 0usize..10usize {
             if draw_probs[i] > 0.0 {
@@ -323,9 +315,9 @@ impl BlackJackGame {
             else {
                 let mut expected_value:f64 = 0.0;
                 let draw_probs = self.deck.draw_probs_by_blackjack_value();
-                let mut dealer_clone:Vec<Card>;                
-                let mut drawn_card:Card;
-                let mut drawn_deck:Deck;
+                let mut dealer_clone:Vec<usize>;                
+                let mut drawn_card:usize;
+                let mut drawn_deck:BlackjackDeck;
                 let mut drawn_game:Self;
                 for i in 0usize..10usize {
                     if draw_probs[i] > 0.0 {
