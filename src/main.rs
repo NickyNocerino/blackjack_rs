@@ -10,14 +10,14 @@ fn main() {
     fs::remove_dir_all("bin/").expect("");
     fs::create_dir_all("bin/").expect("");
 
-    let mut bj_game = OptimizedBlackJackGame::new_standard(1);
+    let mut bj_game = OptimizedBlackJackGame::new_standard(11);
     //bj_game.print_contents();
-    bj_game = bj_game.deal();
+    //bj_game = bj_game.deal();
     //bj_game = bj_game.hit();
     //bj_game = bj_game.stay();
     let now = Instant::now();
     bj_game.print_contents();
-    println!("computation to {} seconds", now.elapsed().as_secs_f64())
+    println!("computation took {} seconds", now.elapsed().as_secs_f64())
     
 
 }

@@ -4,6 +4,7 @@ use game_pieces_rs::card::{Suit, Rank, Card};
 use std::time::{Instant};
 use std::fs;
 use std::path::Path;
+use std::thread;
 
 
 pub struct OptimizedBlackJackGame {
@@ -200,6 +201,7 @@ impl OptimizedBlackJackGame {
         let mut drawn_card:usize;
         let mut drawn_deck:BlackjackDeck;
         let mut drawn_game:Self;
+        //let mut threads = vec![];
         for i in 0usize..10usize {
             //println!("Hit blackjack index {:?} draw probability = {:?}", i, draw_probs[i] );
             if draw_probs[i] > 0.0 {
@@ -212,10 +214,13 @@ impl OptimizedBlackJackGame {
                     stay:false,
                     deck:drawn_deck,
                 };
-                
+                //threads.push(thread::spawn(move || { return draw_probs[i] * drawn_game.get_expected_value();}));
                 expected_value += draw_probs[i] * drawn_game.get_expected_value();
             }
         }
+        // for thread in threads {
+        //     expected_value += thread.join().unwrap();
+        // }
         return expected_value;
     }
 
@@ -236,6 +241,7 @@ impl OptimizedBlackJackGame {
         let mut drawn_card:usize;
         let mut drawn_deck:BlackjackDeck;
         let mut drawn_game:Self;
+        let mut threads = vec![];
         for i in 0usize..10usize {
             if draw_probs[i] > 0.0 {
                 (drawn_card, drawn_deck) = self.deck.draw_blackjack_value_index(i);
@@ -247,8 +253,12 @@ impl OptimizedBlackJackGame {
                     stay:false,
                     deck:drawn_deck,
                 };
-                expected_value += draw_probs[i] * drawn_game.get_hit_expected_value();
+                threads.push(thread::spawn(move || { return draw_probs[i] * drawn_game.get_hit_expected_value();}));
+                //expected_value += draw_probs[i] * drawn_game.get_hit_expected_value();
             }
+        }
+        for thread in threads {
+            expected_value += thread.join().unwrap();
         }
         return expected_value;
     }
@@ -292,16 +302,15 @@ impl OptimizedBlackJackGame {
 
         // if stay, check for payouts
         if self.stay {
-            if self.is_hand_blackjack() {
-                return 1.5;
-            }
-
             if self.get_dealer_value() > self.get_hand_value() {
                 return -1.0
             }
 
             // dealer stays on >=17
             if self.get_dealer_value() > 16 {
+                if self.is_hand_blackjack() && !self.is_dealer_blackjack(){
+                    return 1.5;
+                }
                 if self.get_dealer_value() == self.get_hand_value() {
                     return 0.0;
                 }
