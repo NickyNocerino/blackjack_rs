@@ -268,7 +268,7 @@ impl OptimizedBlackJackGame {
         let cached_ev = self.read_bin_file_cache(unique_key.clone());
         match cached_ev{
             Some(x) => {
-                println!("got cached ev for {} = {} ", unique_key.clone(), x);
+                //println!("got cached ev for {} = {} ", unique_key.clone(), x);
                 return x;
             }
             None => {}
@@ -342,8 +342,8 @@ impl OptimizedBlackJackGame {
                         expected_value += draw_probs[i] * drawn_game.get_expected_value();
                     }
                 }
-                if now.elapsed().as_secs() > 5 {
-                    println!("caching {} = {}, it took {} seconds to complete", unique_key.clone(), expected_value,  now.elapsed().as_secs());
+                if now.elapsed().as_secs() > 1 {
+                    //println!("caching {} = {}, it took {} seconds to complete", unique_key.clone(), expected_value,  now.elapsed().as_secs());
                     self.write_bin_file_cache(unique_key, expected_value);
                 }
                 return expected_value;
@@ -354,8 +354,8 @@ impl OptimizedBlackJackGame {
             let stay_ev = self.get_stay_expected_value();
             let hit_ev =self.get_hit_expected_value();
             let expected_value = f64::max(stay_ev, hit_ev);
-            if now.elapsed().as_secs() > 5 {
-                println!("caching {} = {}, it took {} seconds to complete", unique_key.clone(), expected_value, now.elapsed().as_secs());
+            if now.elapsed().as_secs() > 1 {
+                //println!("caching {} = {}, it took {} seconds to complete", unique_key.clone(), expected_value, now.elapsed().as_secs());
                 self.write_bin_file_cache(unique_key.clone(), expected_value);
             }
             return expected_value;
