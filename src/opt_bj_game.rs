@@ -6,7 +6,10 @@ use std::fs;
 use std::path::Path;
 use std::thread;
 
+use pyo3::prelude::*;
 
+
+#[pyclass]
 pub struct OptimizedBlackJackGame {
     hand: Vec<usize>,
     dealer: Vec<usize>,
@@ -14,7 +17,10 @@ pub struct OptimizedBlackJackGame {
     deck: BlackjackDeck,
 }
 
+#[pymethods]
 impl OptimizedBlackJackGame {
+
+    #[new]
     pub fn new_empty() -> Self {
         Self{
             hand:Vec::<usize>::new(),
@@ -24,6 +30,7 @@ impl OptimizedBlackJackGame {
         }
     }
 
+    #[classmethod]
     pub fn new_standard(num_decks:usize) -> Self {
         let mut deck_list = Vec::<Card>::new();
         let suit_list = vec![Suit::Spades, Suit::Clubs, Suit::Diamonds, Suit::Hearts];

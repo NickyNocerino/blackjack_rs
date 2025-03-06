@@ -26,5 +26,6 @@ Cargo.lock
 
 #me
 /bin 
-*.temp 
+*.temp
+/venv
 

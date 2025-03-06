@@ -6,9 +6,8 @@ edition = "2021"
 [lib]
 name = "blackjack_rs"
 
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
-
 game_pieces_rs = { git = "https://github.com/NickyNocerino/game_pieces_rs.git" }
-
-[dependencies.redis]
-version = "*"
+pyo3 = { version = "0.23.5", features = ["extension-module"] }
