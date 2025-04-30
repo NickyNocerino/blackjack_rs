@@ -1,4 +1,3 @@
-use blackjack_rs::game::BlackJackGame;
 use blackjack_rs::opt_bj_game::OptimizedBlackJackGame;
 
 use std::fs;
@@ -12,7 +11,7 @@ fn main() {
 
     let mut bj_game = OptimizedBlackJackGame::new_standard(11);
     //bj_game.print_contents();
-    //bj_game = bj_game.deal();
+    bj_game = bj_game.deal();
     //bj_game = bj_game.hit();
     //bj_game = bj_game.stay();
     let now = Instant::now();

@@ -1,10 +1,6 @@
 use game_pieces_rs::card::{Suit, Rank, Card};
 use game_pieces_rs::deck::Deck;
 
-use std::fs;
-use std::path::Path;
-
-
 pub struct BlackJackGame {
     hand: Vec<Card>,
     dealer: Vec<Card>,
